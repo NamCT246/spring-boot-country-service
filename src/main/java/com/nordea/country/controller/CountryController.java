@@ -1,19 +1,14 @@
 package com.nordea.country.controller;
 
-import java.util.List;
 import com.nordea.country.dto.CountriesListResponseDto;
-import com.nordea.country.dto.CountriesResponseDto;
 import com.nordea.country.dto.CountryResponseDto;
 import com.nordea.country.service.CountryService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.Api;
-import lombok.AllArgsConstructor;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Api(tags = {"Get related data to country from external service"})

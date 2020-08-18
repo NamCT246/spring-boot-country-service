@@ -75,19 +75,19 @@ public class CountryService {
                                                                 "Remote service is down, error code: "
                                                                                 + clientResponse.statusCode()
                                                                                                 .toString())))
-                                .bodyToMono(CountryRequestDto.class);
+                                .bodyToMono(CountryRequestDto[].class)
+                                .map(countryList -> countryList[0]);
 
                 return response;
         }
 
         public Mono<CountryResponseDto> getCountryByName(String countryName) {
                 return getCountryByNameFromService(countryName)
-                                .map(res -> Mono.justOrEmpty(CountryResponseDto.builder()
+                                .flatMap(res -> Mono.justOrEmpty(CountryResponseDto.builder()
                                                 .name(res.getName()).capital(res.getCapital())
                                                 .countryCode(res.getAlpha2Code())
                                                 .flagFileUrl(res.getFlag())
-                                                .population(res.getPopulation()).build()))
-                                .flatMap(result -> Mono.just(result));
+                                                .population(res.getPopulation()).build()));
         }
 
 }

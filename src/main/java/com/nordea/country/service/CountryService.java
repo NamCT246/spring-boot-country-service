@@ -7,9 +7,10 @@ import com.nordea.country.dto.CountriesRequestDto;
 import com.nordea.country.dto.CountriesResponseDto;
 import com.nordea.country.dto.CountryRequestDto;
 import com.nordea.country.dto.CountryResponseDto;
-import com.nordea.country.exceptions.CountryServiceException;
+import com.nordea.country.exceptions.integration.CountriesServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -31,11 +32,20 @@ public class CountryService {
         private final String countryByNameEndpoint = "/name/";
 
         private Flux<CountriesRequestDto> getAllCountriesFromService() {
-                Flux<CountriesRequestDto> response =
-                                client.get().uri(countryEndpoint + allCountriesEndpoint)
-                                                .accept(MediaType.APPLICATION_JSON).retrieve()
-                                                .bodyToFlux(CountriesRequestDto.class);
-                // // .onErrorMap(CountryServiceException::new);
+                Flux<CountriesRequestDto> response = client.get()
+                                .uri(countryEndpoint + allCountriesEndpoint)
+                                .accept(MediaType.APPLICATION_JSON).retrieve()
+                                .onStatus(HttpStatus::is5xxServerError, clientResponse -> Mono
+                                                .error(new CountriesServiceException(
+                                                                "Remote service can't find the resource. Error code: "
+                                                                                + clientResponse.statusCode()
+                                                                                                .toString())))
+                                .onStatus(HttpStatus::is5xxServerError, clientResponse -> Mono
+                                                .error(new CountriesServiceException(
+                                                                "Remote service is down, error code: "
+                                                                                + clientResponse.statusCode()
+                                                                                                .toString())))
+                                .bodyToFlux(CountriesRequestDto.class);
 
                 return response;
         }
@@ -55,6 +65,16 @@ public class CountryService {
                 Mono<CountryRequestDto> response = client.get()
                                 .uri(countryEndpoint + countryByNameEndpoint + countryName)
                                 .accept(MediaType.APPLICATION_JSON).retrieve()
+                                .onStatus(HttpStatus::is5xxServerError, clientResponse -> Mono
+                                                .error(new CountriesServiceException(
+                                                                "Remote service can't find the resource. Error code: "
+                                                                                + clientResponse.statusCode()
+                                                                                                .toString())))
+                                .onStatus(HttpStatus::is5xxServerError, clientResponse -> Mono
+                                                .error(new CountriesServiceException(
+                                                                "Remote service is down, error code: "
+                                                                                + clientResponse.statusCode()
+                                                                                                .toString())))
                                 .bodyToMono(CountryRequestDto.class);
 
                 return response;
@@ -62,11 +82,12 @@ public class CountryService {
 
         public Mono<CountryResponseDto> getCountryByName(String countryName) {
                 return getCountryByNameFromService(countryName)
-                                .flatMap(res -> Mono.from(Mono.just(CountryResponseDto.builder()
+                                .map(res -> Mono.justOrEmpty(CountryResponseDto.builder()
                                                 .name(res.getName()).capital(res.getCapital())
                                                 .countryCode(res.getAlpha2Code())
                                                 .flagFileUrl(res.getFlag())
-                                                .population(res.getPopulation()).build())));
+                                                .population(res.getPopulation()).build()))
+                                .flatMap(result -> Mono.just(result));
         }
 
 }

@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class CountryService {
 
-        @Value("${country.api.endpoint}")
+        @Value("${country.rest.api.endpoint}")
         private String countryEndpoint;
 
         @Autowired

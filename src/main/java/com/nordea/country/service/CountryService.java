@@ -4,7 +4,7 @@ import java.util.List;
 import com.nordea.country.dto.CountriesListResponseDto;
 import com.nordea.country.dto.CountriesResponseDto;
 import com.nordea.country.dto.CountryResponseDto;
-import com.nordea.country.service.integration.CountryServiceCaller;
+import com.nordea.country.integration.CountryServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
@@ -15,25 +15,26 @@ import reactor.core.publisher.Mono;
 public class CountryService {
 
         @Autowired
-        private CountryServiceCaller caller;
+        private CountryServiceClient client;
 
         public Mono<CountriesListResponseDto> getAllCountries() {
-                Mono<List<CountriesResponseDto>> result = caller.getAllCountriesFromService()
-                                .map(res -> CountriesResponseDto.builder()
-                                                .countryCode(res.getAlpha2Code())
-                                                .name(res.getName()).build())
-                                .collectList();
+                return client.getAllCountriesFromService()
+                                .map(country -> CountriesResponseDto.builder()
+                                                .countryCode(country.getAlpha2Code())
+                                                .name(country.getName()).build())
+                                .collectList().flatMap(countryList -> Mono
+                                                .just(new CountriesListResponseDto(countryList)));
 
-                return result.flatMap(res -> Mono.just(new CountriesListResponseDto(res)));
         }
 
         public Mono<CountryResponseDto> getCountryByName(String countryName) {
-                return caller.getCountryByNameFromService(countryName)
-                                .flatMap(res -> Mono.justOrEmpty(CountryResponseDto.builder()
-                                                .name(res.getName()).capital(res.getCapital())
-                                                .countryCode(res.getAlpha2Code())
-                                                .flagFileUrl(res.getFlag())
-                                                .population(res.getPopulation()).build()));
+                return client.getCountryByNameFromService(countryName)
+                                .flatMap(country -> Mono.justOrEmpty(CountryResponseDto.builder()
+                                                .name(country.getName())
+                                                .capital(country.getCapital())
+                                                .countryCode(country.getAlpha2Code())
+                                                .flagFileUrl(country.getFlag())
+                                                .population(country.getPopulation()).build()));
         }
 
 }

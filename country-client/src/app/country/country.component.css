@@ -1,0 +1,15 @@
+.card-img-top {
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: 200px;
+}
+
+input {
+  vertical-align: middle;
+  margin-right: 24px;
+}
+
+.card-country-info {
+  width: 18rem;
+  margin-top: 20px;
+}

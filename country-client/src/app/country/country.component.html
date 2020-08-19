@@ -1,0 +1,16 @@
+<div class="country-fetcher-wrapper">
+    <div class="country-form">
+        <input #countryInput placeholder="search by country name">
+        <button type="button" class="btn btn-primary" (click)="getCountryByName(countryInput.value)">Fetch country by name</button>
+    </div>
+
+    <div class="card-country-info" *ngIf="country">
+        <div class="card-img-top" alt="Country flag" [style.background-image]="'url(' + country.flag_file_url + ')'"></div>
+        <div class="card-body" *ngIf="!isObjectEmpty(country)">
+            <h5 class="card-title">Name: {{country.name}}</h5>
+            <p class="card-text">Code: {{country.country_code}}</p>
+            <p class="card-text">Capital: {{country.capital}}</p>
+            <p class="card-text">Population: {{country.population || null}}</p>
+        </div>
+    </div>
+</div>

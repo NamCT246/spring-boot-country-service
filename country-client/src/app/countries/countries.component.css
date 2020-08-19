@@ -1,0 +1,15 @@
+virtual-scroller {
+  width: 100%;
+  height: 400px;
+  margin-top: 20px;
+}
+
+.countries-wrapper {
+  display: block;
+  width: 100%;
+  height: 30px;
+}
+
+.country-code {
+  margin-right: 20px;
+}

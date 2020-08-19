@@ -1,0 +1,9 @@
+.country-service-wrapper {
+  display: flex;
+}
+
+app-countries,
+app-country {
+  flex: 1;
+  margin: 20px;
+}
